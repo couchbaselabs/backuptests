@@ -54,7 +54,8 @@ func TestBackupRestore(t *testing.T) {
 	createCouchbaseBucket(testHostNoAuth, "default", "", t)
 
 	// Restore the data
-	err = backup.Restore(a, backupName, testHost, "Administrator", "password", name, name, config)
+	err = backup.Restore(a, backupName, testHost, "Administrator", "password", name,
+		name, false, config)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
