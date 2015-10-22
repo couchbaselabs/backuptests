@@ -278,3 +278,47 @@ func TestBackupDeleteBucketBackupAgain(t *testing.T) {
 		t.Fatal("Expected to backup 10000 items, got " + strconv.Itoa(count))
 	}
 }
+
+func TestBackupWithMemcachedBucket(t *testing.T) {
+	defer cleanup()
+	defer deleteAllBuckets(testHostNoAuth, t)
+	deleteAllBuckets(testHostNoAuth, t)
+	createCouchbaseBucket(testHostNoAuth, "default", "", t)
+	createMemcachedBucket(testHostNoAuth, "mcd", "", t)
+
+	backupName := "skip-mcd-bucket-test"
+
+	loadData(testHostNoAuth, "default", "", 5000, "one", t)
+
+	config := value.CreateBackupConfig("", "", make([]string, 0),
+		make([]string, 0), make([]string, 0), make([]string, 0),
+		false, false, false, false, false, false)
+
+	a, err := archive.MountArchive(testDir)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if err := a.CreateBackup(backupName, config); err != nil {
+		t.Fatal(err.Error())
+	}
+
+	name, err := backup.Backup(a, backupName, testHost, "Administrator", "password",
+		4, false, false)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	info, err := a.IncrBackupInfo(backupName, name)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(info) != 1 {
+		t.Fatal("Expected only 1 bucket to be backed up")
+	}
+
+	if _, ok := info["default"]; !ok {
+		t.Fatal("Expected default bucket to be backed up")
+	}
+}
