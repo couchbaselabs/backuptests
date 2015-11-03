@@ -80,7 +80,7 @@ func createBucket(host string, settings *gocb.BucketSettings, t *testing.T) {
 		t.Fatal("Bucket creation failed: " + err.Error())
 	}
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(10 * time.Second)
 }
 
 func deleteAllBuckets(host string, t *testing.T) {
