@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mikewied/gocb"
+	"github.com/couchbase/gocb"
 )
 
 const testDir string = "/tmp/backup-test"
