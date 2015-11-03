@@ -80,7 +80,63 @@ func createBucket(host string, settings *gocb.BucketSettings, t *testing.T) {
 		t.Fatal("Bucket creation failed: " + err.Error())
 	}
 
-	time.Sleep(10 * time.Second)
+	for i := 0; i < 30; i++ {
+		if isBucketReady(host, settings.Name, t) {
+			return
+		}
+		time.Sleep(1 * time.Second)
+	}
+
+	t.Fatal("Bucket creation timed out")
+}
+
+func isBucketReady(host, bucket string, t *testing.T) bool {
+	url := "/pools/default/buckets/" + bucket
+
+	req, err := http.NewRequest("GET", host+url, nil)
+	if err != nil {
+		t.Fatalf("Failed to create http request: %s", err.Error())
+	}
+	req.SetBasicAuth("Administrator", "password")
+
+	client := http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf("Error sending http request: %s", err.Error())
+	} else if resp.StatusCode != http.StatusOK {
+		return false
+	}
+
+	defer resp.Body.Close()
+
+	type overlay struct {
+		Name  string `json:"name"`
+		Nodes []struct {
+			Status string `json:"status"`
+		} `json:"nodes"`
+	}
+
+	var data overlay
+	decoder := json.NewDecoder(resp.Body)
+	if err = decoder.Decode(&data); err != nil {
+		t.Fatalf("Error decoding response: %s", err.Error())
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return false
+	}
+
+	if len(data.Nodes) == 0 {
+		return false
+	}
+
+	for _, node := range data.Nodes {
+		if node.Status != "healthy" {
+			return false
+		}
+	}
+
+	return true
 }
 
 func deleteAllBuckets(host string, t *testing.T) {
