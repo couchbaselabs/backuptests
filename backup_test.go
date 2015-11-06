@@ -66,8 +66,10 @@ func TestFullBackup(t *testing.T) {
 	defer deleteAllBuckets(testHostNoAuth, t)
 	deleteAllBuckets(testHostNoAuth, t)
 	createCouchbaseBucket(testHostNoAuth, "default", "", t)
+	createCouchbaseBucket(testHostNoAuth, "saslbucket", "saslpwd", t)
 
 	loadData(testHostNoAuth, "default", "", 5000, "full", t)
+	loadData(testHostNoAuth, "saslbucket", "saslpwd", 2500, "full", t)
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
@@ -96,6 +98,11 @@ func TestFullBackup(t *testing.T) {
 	count := info["default"].NumDocs
 	if count != 5000 {
 		t.Fatal("Expected to backup 5000 items, got " + strconv.Itoa(count))
+	}
+
+	count = info["saslbucket"].NumDocs
+	if count != 2500 {
+		t.Fatal("Expected to backup 2500 items, got " + strconv.Itoa(count))
 	}
 }
 
