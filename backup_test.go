@@ -33,7 +33,7 @@ func TestBackupBadPassword(t *testing.T) {
 	}
 
 	// Test bad password
-	_, err = backup.Backup(a, backupName, testHost, "Administrator", "badpassword",
+	_, err = backup.Backup(a, backupName, testHost, restUsername, "badpassword",
 		4, false, false)
 	if err == nil {
 		t.Fatal("Backup succeeded, but expected failure")
@@ -47,7 +47,7 @@ func TestBackupBadPassword(t *testing.T) {
 	}
 
 	// Test bad username
-	_, err = backup.Backup(a, backupName, testHost, "Adminiator", "password",
+	_, err = backup.Backup(a, backupName, testHost, "Adminiator", restPassword,
 		4, false, false)
 	if err == nil {
 		t.Fatal("Backup succeeded, but expected failure")
@@ -82,7 +82,7 @@ func TestFullBackup(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	name, err := backup.Backup(a, "full-backup-test", testHost, "Administrator", "password",
+	name, err := backup.Backup(a, "full-backup-test", testHost, restUsername, restPassword,
 		4, false, false)
 	if err != nil {
 		t.Fatal(err.Error())
@@ -123,7 +123,7 @@ func TestIncrementalBackup(t *testing.T) {
 	// Do full backup
 	loadData(testHostNoAuth, "default", "", 5000, "full", t)
 
-	name, err := backup.Backup(a, setName, testHost, "Administrator", "password",
+	name, err := backup.Backup(a, setName, testHost, restUsername, restPassword,
 		4, false, false)
 
 	info, err := a.IncrBackupInfo(setName, name)
@@ -139,7 +139,7 @@ func TestIncrementalBackup(t *testing.T) {
 	// Do first incremental backup
 	loadData(testHostNoAuth, "default", "", 4000, "incr-1-", t)
 
-	name, err = backup.Backup(a, setName, testHost, "Administrator", "password",
+	name, err = backup.Backup(a, setName, testHost, restUsername, restPassword,
 		4, false, false)
 
 	info, err = a.IncrBackupInfo(setName, name)
@@ -155,7 +155,7 @@ func TestIncrementalBackup(t *testing.T) {
 	// Do second incremental backup
 	loadData(testHostNoAuth, "default", "", 3000, "incr-2-", t)
 
-	name, err = backup.Backup(a, setName, testHost, "Administrator", "password",
+	name, err = backup.Backup(a, setName, testHost, restUsername, restPassword,
 		4, false, false)
 
 	info, err = a.IncrBackupInfo(setName, name)
@@ -171,7 +171,7 @@ func TestIncrementalBackup(t *testing.T) {
 	// Do third incremental backup
 	loadData(testHostNoAuth, "default", "", 2000, "incr-3-", t)
 
-	name, err = backup.Backup(a, setName, testHost, "Administrator", "password",
+	name, err = backup.Backup(a, setName, testHost, restUsername, restPassword,
 		4, false, false)
 
 	info, err = a.IncrBackupInfo(setName, name)
@@ -203,7 +203,7 @@ func TestBackupNoBucketsExist(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	name, err := backup.Backup(a, "full-backup-test", testHost, "Administrator", "password",
+	name, err := backup.Backup(a, "full-backup-test", testHost, restUsername, restPassword,
 		4, false, false)
 	if err != nil {
 		t.Fatal(err.Error())
@@ -242,7 +242,7 @@ func TestBackupDeleteBucketBackupAgain(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	name, err := backup.Backup(a, backupName, testHost, "Administrator", "password",
+	name, err := backup.Backup(a, backupName, testHost, restUsername, restPassword,
 		4, false, false)
 	if err != nil {
 		t.Fatal(err.Error())
@@ -262,7 +262,7 @@ func TestBackupDeleteBucketBackupAgain(t *testing.T) {
 	createCouchbaseBucket(testHostNoAuth, "default", "", t)
 	loadData(testHostNoAuth, "default", "", 10000, "two", t)
 
-	name, err = backup.Backup(a, backupName, testHost, "Administrator", "password",
+	name, err = backup.Backup(a, backupName, testHost, restUsername, restPassword,
 		4, false, false)
 	if err != nil {
 		t.Fatal(err.Error())
@@ -303,7 +303,7 @@ func TestBackupWithMemcachedBucket(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	name, err := backup.Backup(a, backupName, testHost, "Administrator", "password",
+	name, err := backup.Backup(a, backupName, testHost, restUsername, restPassword,
 		4, false, false)
 	if err != nil {
 		t.Fatal(err.Error())

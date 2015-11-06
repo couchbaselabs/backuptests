@@ -9,14 +9,12 @@ import (
 
 func TestGetPutViews(t *testing.T) {
 	bucket := "default"
-	username := "Administrator"
-	password := "password"
 	host := "http://127.0.0.1:9000"
 	defer deleteAllBuckets(host, t)
 	deleteAllBuckets(host, t)
 	createCouchbaseBucket(host, bucket, "", t)
 
-	rest := couchbase.CreateRestClient(host, username, password)
+	rest := couchbase.CreateRestClient(host, restUsername, restPassword)
 	ddocs := make([]value.DDoc, 0)
 
 	single := make(map[string]map[string]map[string]string)

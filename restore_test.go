@@ -34,7 +34,7 @@ func TestBackupRestore(t *testing.T) {
 	}
 
 	// Backup the data
-	name, err := backup.Backup(a, backupName, testHost, "Administrator", "password",
+	name, err := backup.Backup(a, backupName, testHost, restUsername, restPassword,
 		4, false, false)
 	if err != nil {
 		t.Fatal(err.Error())
@@ -54,14 +54,14 @@ func TestBackupRestore(t *testing.T) {
 	createCouchbaseBucket(testHostNoAuth, "default", "", t)
 
 	// Restore the data
-	err = backup.Restore(a, backupName, testHost, "Administrator", "password", name,
+	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, name,
 		name, false, config)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
 	time.Sleep(5 * time.Second)
-	items, err := getNumItems(testHost, "Administrator", "password", "default")
+	items, err := getNumItems(testHost, restUsername, restPassword, "default")
 	if err != nil {
 		t.Fatalf("Error getting item count: %s", err.Error())
 	}
