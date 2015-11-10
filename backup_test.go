@@ -3,6 +3,7 @@ package tests
 import (
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/couchbase/backup"
 	"github.com/couchbase/backup/archive"
@@ -130,10 +131,10 @@ func TestIncrementalBackup(t *testing.T) {
 	// Do full backup
 	loadData(testHostNoAuth, "default", "", 5000, "full", t)
 
-	name, err := backup.Backup(a, setName, testHost, restUsername, restPassword,
+	name1, err := backup.Backup(a, setName, testHost, restUsername, restPassword,
 		4, false, false)
 
-	info, err := a.IncrBackupInfo(setName, name)
+	info, err := a.IncrBackupInfo(setName, name1)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -146,10 +147,10 @@ func TestIncrementalBackup(t *testing.T) {
 	// Do first incremental backup
 	loadData(testHostNoAuth, "default", "", 4000, "incr-1-", t)
 
-	name, err = backup.Backup(a, setName, testHost, restUsername, restPassword,
+	name2, err := backup.Backup(a, setName, testHost, restUsername, restPassword,
 		4, false, false)
 
-	info, err = a.IncrBackupInfo(setName, name)
+	info, err = a.IncrBackupInfo(setName, name2)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -162,10 +163,10 @@ func TestIncrementalBackup(t *testing.T) {
 	// Do second incremental backup
 	loadData(testHostNoAuth, "default", "", 3000, "incr-2-", t)
 
-	name, err = backup.Backup(a, setName, testHost, restUsername, restPassword,
+	name3, err := backup.Backup(a, setName, testHost, restUsername, restPassword,
 		4, false, false)
 
-	info, err = a.IncrBackupInfo(setName, name)
+	info, err = a.IncrBackupInfo(setName, name3)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -178,10 +179,10 @@ func TestIncrementalBackup(t *testing.T) {
 	// Do third incremental backup
 	loadData(testHostNoAuth, "default", "", 2000, "incr-3-", t)
 
-	name, err = backup.Backup(a, setName, testHost, restUsername, restPassword,
+	name4, err := backup.Backup(a, setName, testHost, restUsername, restPassword,
 		4, false, false)
 
-	info, err = a.IncrBackupInfo(setName, name)
+	info, err = a.IncrBackupInfo(setName, name4)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -189,6 +190,83 @@ func TestIncrementalBackup(t *testing.T) {
 	count = info["default"].NumDocs
 	if count != 2000 {
 		t.Fatal("Expected to backup 2000 items, got " + strconv.Itoa(count))
+	}
+
+	// Restore the data without explicitly setting the start/end point in
+	// order to restore all backed up data.
+	deleteBucket(testHostNoAuth, "default", t, true)
+	createCouchbaseBucket(testHostNoAuth, "default", "", t)
+
+	err = backup.Restore(a, setName, testHost, restUsername, restPassword, "",
+		"", false, config)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	time.Sleep(5 * time.Second)
+	items, err := getNumItems(testHost, restUsername, restPassword, "default")
+	if err != nil {
+		t.Fatalf("Error getting item count: %s", err.Error())
+	}
+	if items != 14000 {
+		t.Fatalf("Expected 14000 items, got %d", items)
+	}
+
+	// Restore only the 2nd and 3rd backup
+	deleteBucket(testHostNoAuth, "default", t, true)
+	createCouchbaseBucket(testHostNoAuth, "default", "", t)
+
+	err = backup.Restore(a, setName, testHost, restUsername, restPassword, name2,
+		name3, false, config)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	time.Sleep(5 * time.Second)
+	items, err = getNumItems(testHost, restUsername, restPassword, "default")
+	if err != nil {
+		t.Fatalf("Error getting item count: %s", err.Error())
+	}
+	if items != 7000 {
+		t.Fatalf("Expected 7000 items, got %d", items)
+	}
+
+	// Restore everything after and including the 3rd backup, don't specify the end
+	deleteBucket(testHostNoAuth, "default", t, true)
+	createCouchbaseBucket(testHostNoAuth, "default", "", t)
+
+	err = backup.Restore(a, setName, testHost, restUsername, restPassword, name3,
+		"", false, config)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	time.Sleep(5 * time.Second)
+	items, err = getNumItems(testHost, restUsername, restPassword, "default")
+	if err != nil {
+		t.Fatalf("Error getting item count: %s", err.Error())
+	}
+	if items != 5000 {
+		t.Fatalf("Expected 5000 items, got %d", items)
+	}
+
+	// Restore everything before and including the 2nd backup, don't specify start
+	deleteBucket(testHostNoAuth, "default", t, true)
+	createCouchbaseBucket(testHostNoAuth, "default", "", t)
+
+	err = backup.Restore(a, setName, testHost, restUsername, restPassword, "",
+		name2, false, config)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	time.Sleep(5 * time.Second)
+	items, err = getNumItems(testHost, restUsername, restPassword, "default")
+	if err != nil {
+		t.Fatalf("Error getting item count: %s", err.Error())
+	}
+	if items != 9000 {
+		t.Fatalf("Expected 9000 items, got %d", items)
 	}
 }
 

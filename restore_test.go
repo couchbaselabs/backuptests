@@ -33,6 +33,15 @@ func TestBackupRestore(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
+	// Test that restoring data when noe exists gives an error
+	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, "name",
+		"name", false, config)
+	if err == nil {
+		t.Fatal(err.Error())
+	} else if _, ok := err.(backup.NothingToRestoreError); !ok {
+		t.Fatal(err.Error())
+	}
+
 	// Backup the data
 	name, err := backup.Backup(a, backupName, testHost, restUsername, restPassword,
 		4, false, false)
@@ -53,7 +62,25 @@ func TestBackupRestore(t *testing.T) {
 	deleteBucket(testHostNoAuth, "default", t, true)
 	createCouchbaseBucket(testHostNoAuth, "default", "", t)
 
-	// Restore the data
+	// Check that using an invalid start point causes an error
+	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, "name",
+		name, false, config)
+	if err == nil {
+		t.Fatal(err.Error())
+	} else if _, ok := err.(backup.RestorePointError); !ok {
+		t.Fatal(err.Error())
+	}
+
+	// Check that using an invalid end point causes an error
+	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, name,
+		"end", false, config)
+	if err == nil {
+		t.Fatal(err.Error())
+	} else if _, ok := err.(backup.RestorePointError); !ok {
+		t.Fatal(err.Error())
+	}
+
+	// Restore the data using explicit start/end specification
 	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, name,
 		name, false, config)
 	if err != nil {
@@ -62,6 +89,25 @@ func TestBackupRestore(t *testing.T) {
 
 	time.Sleep(5 * time.Second)
 	items, err := getNumItems(testHost, restUsername, restPassword, "default")
+	if err != nil {
+		t.Fatalf("Error getting item count: %s", err.Error())
+	}
+	if items != 5000 {
+		t.Fatalf("Expected 5000 items, got %d", items)
+	}
+
+	deleteBucket(testHostNoAuth, "default", t, true)
+	createCouchbaseBucket(testHostNoAuth, "default", "", t)
+
+	// Restore the data without explicitly setting the start/end point
+	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, "",
+		"", false, config)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	time.Sleep(5 * time.Second)
+	items, err = getNumItems(testHost, restUsername, restPassword, "default")
 	if err != nil {
 		t.Fatalf("Error getting item count: %s", err.Error())
 	}
