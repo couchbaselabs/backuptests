@@ -39,6 +39,8 @@ func loadData(host string, bucket string, password string, items int,
 			t.Fatal("Error setting `" + key + "`, " + err.Error())
 		}
 	}
+
+	b.Close()
 }
 
 func createMemcachedBucket(host, bucket, password string, t *testing.T) {
