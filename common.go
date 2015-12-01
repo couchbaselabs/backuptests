@@ -12,8 +12,7 @@ import (
 )
 
 const testDir string = "/tmp/backup-test"
-const testHost = "http://Administrator:password@127.0.0.1:9000"
-const testHostNoAuth = "http://127.0.0.1:9000"
+const testHost = "http://127.0.0.1:9000"
 const restUsername = "Administrator"
 const restPassword = "password"
 

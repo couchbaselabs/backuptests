@@ -13,11 +13,11 @@ import (
 
 func TestBackupBadPassword(t *testing.T) {
 	defer cleanup()
-	defer deleteAllBuckets(testHostNoAuth, t)
-	deleteAllBuckets(testHostNoAuth, t)
-	createCouchbaseBucket(testHostNoAuth, "default", "", t)
+	defer deleteAllBuckets(testHost, t)
+	deleteAllBuckets(testHost, t)
+	createCouchbaseBucket(testHost, "default", "", t)
 
-	loadData(testHostNoAuth, "default", "", 5000, "full", t)
+	loadData(testHost, "default", "", 5000, "full", t)
 
 	backupName := "badpassword-test"
 	config := value.CreateBackupConfig("", "", make([]string, 0),
@@ -64,13 +64,13 @@ func TestBackupBadPassword(t *testing.T) {
 
 func TestFullBackup(t *testing.T) {
 	defer cleanup()
-	defer deleteAllBuckets(testHostNoAuth, t)
-	deleteAllBuckets(testHostNoAuth, t)
-	createCouchbaseBucket(testHostNoAuth, "default", "", t)
-	createCouchbaseBucket(testHostNoAuth, "saslbucket", "saslpwd", t)
+	defer deleteAllBuckets(testHost, t)
+	deleteAllBuckets(testHost, t)
+	createCouchbaseBucket(testHost, "default", "", t)
+	createCouchbaseBucket(testHost, "saslbucket", "saslpwd", t)
 
-	loadData(testHostNoAuth, "default", "", 5000, "full", t)
-	loadData(testHostNoAuth, "saslbucket", "saslpwd", 2500, "full", t)
+	loadData(testHost, "default", "", 5000, "full", t)
+	loadData(testHost, "saslbucket", "saslpwd", 2500, "full", t)
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
@@ -109,9 +109,9 @@ func TestFullBackup(t *testing.T) {
 
 func TestIncrementalBackup(t *testing.T) {
 	defer cleanup()
-	defer deleteAllBuckets(testHostNoAuth, t)
-	deleteAllBuckets(testHostNoAuth, t)
-	createCouchbaseBucket(testHostNoAuth, "default", "", t)
+	defer deleteAllBuckets(testHost, t)
+	deleteAllBuckets(testHost, t)
+	createCouchbaseBucket(testHost, "default", "", t)
 
 	setName := "incr-backup-test"
 
@@ -129,7 +129,7 @@ func TestIncrementalBackup(t *testing.T) {
 	}
 
 	// Do full backup
-	loadData(testHostNoAuth, "default", "", 5000, "full", t)
+	loadData(testHost, "default", "", 5000, "full", t)
 
 	name1, err := backup.Backup(a, setName, testHost, restUsername, restPassword,
 		4, false, false)
@@ -145,7 +145,7 @@ func TestIncrementalBackup(t *testing.T) {
 	}
 
 	// Do first incremental backup
-	loadData(testHostNoAuth, "default", "", 4000, "incr-1-", t)
+	loadData(testHost, "default", "", 4000, "incr-1-", t)
 
 	name2, err := backup.Backup(a, setName, testHost, restUsername, restPassword,
 		4, false, false)
@@ -161,7 +161,7 @@ func TestIncrementalBackup(t *testing.T) {
 	}
 
 	// Do second incremental backup
-	loadData(testHostNoAuth, "default", "", 3000, "incr-2-", t)
+	loadData(testHost, "default", "", 3000, "incr-2-", t)
 
 	name3, err := backup.Backup(a, setName, testHost, restUsername, restPassword,
 		4, false, false)
@@ -177,7 +177,7 @@ func TestIncrementalBackup(t *testing.T) {
 	}
 
 	// Do third incremental backup
-	loadData(testHostNoAuth, "default", "", 2000, "incr-3-", t)
+	loadData(testHost, "default", "", 2000, "incr-3-", t)
 
 	name4, err := backup.Backup(a, setName, testHost, restUsername, restPassword,
 		4, false, false)
@@ -194,8 +194,8 @@ func TestIncrementalBackup(t *testing.T) {
 
 	// Restore the data without explicitly setting the start/end point in
 	// order to restore all backed up data.
-	deleteBucket(testHostNoAuth, "default", t, true)
-	createCouchbaseBucket(testHostNoAuth, "default", "", t)
+	deleteBucket(testHost, "default", t, true)
+	createCouchbaseBucket(testHost, "default", "", t)
 
 	err = backup.Restore(a, setName, testHost, restUsername, restPassword, "",
 		"", false, config)
@@ -213,8 +213,8 @@ func TestIncrementalBackup(t *testing.T) {
 	}
 
 	// Restore only the 2nd and 3rd backup
-	deleteBucket(testHostNoAuth, "default", t, true)
-	createCouchbaseBucket(testHostNoAuth, "default", "", t)
+	deleteBucket(testHost, "default", t, true)
+	createCouchbaseBucket(testHost, "default", "", t)
 
 	err = backup.Restore(a, setName, testHost, restUsername, restPassword, name2,
 		name3, false, config)
@@ -232,8 +232,8 @@ func TestIncrementalBackup(t *testing.T) {
 	}
 
 	// Restore everything after and including the 3rd backup, don't specify the end
-	deleteBucket(testHostNoAuth, "default", t, true)
-	createCouchbaseBucket(testHostNoAuth, "default", "", t)
+	deleteBucket(testHost, "default", t, true)
+	createCouchbaseBucket(testHost, "default", "", t)
 
 	err = backup.Restore(a, setName, testHost, restUsername, restPassword, name3,
 		"", false, config)
@@ -251,8 +251,8 @@ func TestIncrementalBackup(t *testing.T) {
 	}
 
 	// Restore everything before and including the 2nd backup, don't specify start
-	deleteBucket(testHostNoAuth, "default", t, true)
-	createCouchbaseBucket(testHostNoAuth, "default", "", t)
+	deleteBucket(testHost, "default", t, true)
+	createCouchbaseBucket(testHost, "default", "", t)
 
 	err = backup.Restore(a, setName, testHost, restUsername, restPassword, "",
 		name2, false, config)
@@ -272,8 +272,8 @@ func TestIncrementalBackup(t *testing.T) {
 
 func TestBackupNoBucketsExist(t *testing.T) {
 	defer cleanup()
-	defer deleteAllBuckets(testHostNoAuth, t)
-	deleteAllBuckets(testHostNoAuth, t)
+	defer deleteAllBuckets(testHost, t)
+	deleteAllBuckets(testHost, t)
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
@@ -306,13 +306,13 @@ func TestBackupNoBucketsExist(t *testing.T) {
 
 func TestBackupDeleteBucketBackupAgain(t *testing.T) {
 	defer cleanup()
-	defer deleteAllBuckets(testHostNoAuth, t)
-	deleteAllBuckets(testHostNoAuth, t)
-	createCouchbaseBucket(testHostNoAuth, "default", "", t)
+	defer deleteAllBuckets(testHost, t)
+	deleteAllBuckets(testHost, t)
+	createCouchbaseBucket(testHost, "default", "", t)
 
 	backupName := "backupdelbackup-test"
 
-	loadData(testHostNoAuth, "default", "", 5000, "one", t)
+	loadData(testHost, "default", "", 5000, "one", t)
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
@@ -343,9 +343,9 @@ func TestBackupDeleteBucketBackupAgain(t *testing.T) {
 		t.Fatal("Expected to backup 5000 items, got " + strconv.Itoa(count))
 	}
 
-	deleteAllBuckets(testHostNoAuth, t)
-	createCouchbaseBucket(testHostNoAuth, "default", "", t)
-	loadData(testHostNoAuth, "default", "", 10000, "two", t)
+	deleteAllBuckets(testHost, t)
+	createCouchbaseBucket(testHost, "default", "", t)
+	loadData(testHost, "default", "", 10000, "two", t)
 
 	name, err = backup.Backup(a, backupName, testHost, restUsername, restPassword,
 		4, false, false)
@@ -366,14 +366,14 @@ func TestBackupDeleteBucketBackupAgain(t *testing.T) {
 
 func TestBackupWithMemcachedBucket(t *testing.T) {
 	defer cleanup()
-	defer deleteAllBuckets(testHostNoAuth, t)
-	deleteAllBuckets(testHostNoAuth, t)
-	createCouchbaseBucket(testHostNoAuth, "default", "", t)
-	createMemcachedBucket(testHostNoAuth, "mcd", "", t)
+	defer deleteAllBuckets(testHost, t)
+	deleteAllBuckets(testHost, t)
+	createCouchbaseBucket(testHost, "default", "", t)
+	createMemcachedBucket(testHost, "mcd", "", t)
 
 	backupName := "skip-mcd-bucket-test"
 
-	loadData(testHostNoAuth, "default", "", 5000, "one", t)
+	loadData(testHost, "default", "", 5000, "one", t)
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),

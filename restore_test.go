@@ -12,13 +12,13 @@ import (
 
 func TestBackupRestore(t *testing.T) {
 	defer cleanup()
-	defer deleteAllBuckets(testHostNoAuth, t)
-	deleteAllBuckets(testHostNoAuth, t)
-	createCouchbaseBucket(testHostNoAuth, "default", "", t)
+	defer deleteAllBuckets(testHost, t)
+	deleteAllBuckets(testHost, t)
+	createCouchbaseBucket(testHost, "default", "", t)
 
 	backupName := "restore-test"
 
-	loadData(testHostNoAuth, "default", "", 5000, "full", t)
+	loadData(testHost, "default", "", 5000, "full", t)
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
@@ -59,8 +59,8 @@ func TestBackupRestore(t *testing.T) {
 		t.Fatal("Expected to backup 5000 items, got " + strconv.Itoa(count))
 	}
 
-	deleteBucket(testHostNoAuth, "default", t, true)
-	createCouchbaseBucket(testHostNoAuth, "default", "", t)
+	deleteBucket(testHost, "default", t, true)
+	createCouchbaseBucket(testHost, "default", "", t)
 
 	// Check that using an invalid start point causes an error
 	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, "name",
@@ -96,8 +96,8 @@ func TestBackupRestore(t *testing.T) {
 		t.Fatalf("Expected 5000 items, got %d", items)
 	}
 
-	deleteBucket(testHostNoAuth, "default", t, true)
-	createCouchbaseBucket(testHostNoAuth, "default", "", t)
+	deleteBucket(testHost, "default", t, true)
+	createCouchbaseBucket(testHost, "default", "", t)
 
 	// Restore the data without explicitly setting the start/end point
 	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, "",
