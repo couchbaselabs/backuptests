@@ -25,13 +25,9 @@ func TestBackupRestore(t *testing.T) {
 		false, false, false, false, false, false)
 
 	a, err := archive.MountArchive(testDir)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
+	checkError(err, t)
 
-	if err := a.CreateBackup(backupName, config); err != nil {
-		t.Fatal(err.Error())
-	}
+	checkError(a.CreateBackup(backupName, config), t)
 
 	// Test that restoring data when noe exists gives an error
 	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, "name",
@@ -45,14 +41,10 @@ func TestBackupRestore(t *testing.T) {
 	// Backup the data
 	name, err := backup.Backup(a, backupName, testHost, restUsername, restPassword,
 		4, false, false)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
+	checkError(err, t)
 
 	info, err := a.IncrBackupInfo(backupName, name)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
+	checkError(err, t)
 
 	count := info["default"].NumDocs
 	if count != 5000 {
@@ -83,9 +75,7 @@ func TestBackupRestore(t *testing.T) {
 	// Restore the data using explicit start/end specification
 	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, name,
 		name, false, config)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
+	checkError(err, t)
 
 	time.Sleep(5 * time.Second)
 	items, err := getNumItems(testHost, restUsername, restPassword, "default")
@@ -102,15 +92,12 @@ func TestBackupRestore(t *testing.T) {
 	// Restore the data without explicitly setting the start/end point
 	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, "",
 		"", false, config)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
+	checkError(err, t)
 
 	time.Sleep(5 * time.Second)
 	items, err = getNumItems(testHost, restUsername, restPassword, "default")
-	if err != nil {
-		t.Fatalf("Error getting item count: %s", err.Error())
-	}
+	checkError(err, t)
+
 	if items != 5000 {
 		t.Fatalf("Expected 5000 items, got %d", items)
 	}

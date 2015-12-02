@@ -56,14 +56,10 @@ func TestGetPutViews(t *testing.T) {
 
 	ddocs = append(ddocs, value.DDoc{"_design/spatmulti", "xxxxx", spatialmulti})
 
-	if err := rest.PutViews(bucket, ddocs); err != nil {
-		t.Fatal("Saving views failed: " + err.Error())
-	}
+	checkError(rest.PutViews(bucket, ddocs), t)
 
 	views, err := rest.GetViews(bucket)
-	if err != nil {
-		t.Fatal("Error getting views: " + err.Error())
-	}
+	checkError(err, t)
 
 	if len(views) != 5 {
 		t.Fatal("Expected to get 5 views")

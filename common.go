@@ -2,12 +2,17 @@ package tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
+	"runtime"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/couchbase/backup/couchbase"
+	"github.com/couchbase/backup/value"
 	"github.com/couchbase/gocb"
 )
 
@@ -18,6 +23,17 @@ const restPassword = "password"
 
 func cleanup() {
 	os.RemoveAll(testDir)
+}
+
+func checkError(err error, t *testing.T) {
+	if err != nil {
+		_, file, line, ok := runtime.Caller(1)
+		if ok {
+			parts := strings.Split(file, "/")
+			fmt.Printf("%s:%d: %s\n", parts[len(parts)-1], line, err.Error())
+			t.FailNow()
+		}
+	}
 }
 
 func loadData(host string, bucket string, password string, items int,
@@ -40,6 +56,30 @@ func loadData(host string, bucket string, password string, items int,
 	}
 
 	b.Close()
+}
+
+func loadViews(host, bucket, prefix string, numDDocs, numViews int, t *testing.T) {
+	rest := couchbase.CreateRestClient(testHost, restUsername, restPassword)
+	ddocs := make([]value.DDoc, 0)
+
+	for i := 0; i < numDDocs; i++ {
+		dname := "_design/" + prefix + "_" + strconv.Itoa(i)
+		views := make(map[string]map[string]map[string]string)
+		views["views"] = make(map[string]map[string]string)
+
+		for j := 0; j < numViews; j++ {
+			vname := "generated_views_" + strconv.Itoa(j)
+			views["views"][vname] = make(map[string]string)
+			views["views"][vname]["map"] = "function (doc, meta) {\n emit(meta.id, null);\n}"
+		}
+
+		ddocs = append(ddocs, value.DDoc{dname, "xxxxx", views})
+	}
+
+	err := rest.PutViews(bucket, ddocs)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 }
 
 func createMemcachedBucket(host, bucket, password string, t *testing.T) {
