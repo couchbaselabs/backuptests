@@ -343,3 +343,69 @@ func TestBackupWithMemcachedBucket(t *testing.T) {
 		t.Fatal("Expected default bucket to be backed up")
 	}
 }
+
+func TestBackupWithIncludeBuckets(t *testing.T) {
+	defer cleanup()
+	defer deleteAllBuckets(testHost, t)
+	deleteAllBuckets(testHost, t)
+	createCouchbaseBucket(testHost, "default", "", t)
+	createCouchbaseBucket(testHost, "saslbucket", "saslpwd", t)
+
+	loadData(testHost, "default", "", 5000, "full", t)
+	loadData(testHost, "saslbucket", "saslpwd", 2500, "full", t)
+
+	include_buckets := []string{"default"}
+	config := value.CreateBackupConfig("", "", make([]string, 0),
+		include_buckets, make([]string, 0), make([]string, 0),
+		false, false, false, false, false, false)
+
+	a, err := archive.MountArchive(testDir)
+	checkError(err, t)
+
+	checkError(a.CreateBackup("full-backup-test", config), t)
+
+	name, err := backup.Backup(a, "full-backup-test", testHost, restUsername, restPassword,
+		4, false, false)
+	checkError(err, t)
+
+	info, err := a.IncrBackupInfo("full-backup-test", name)
+	checkError(err, t)
+
+	count := info["default"].NumDocs
+	if count != 5000 {
+		t.Fatal("Expected to backup 5000 items, got " + strconv.Itoa(count))
+	}
+}
+
+func TestBackupWithExcludeBuckets(t *testing.T) {
+	defer cleanup()
+	defer deleteAllBuckets(testHost, t)
+	deleteAllBuckets(testHost, t)
+	createCouchbaseBucket(testHost, "default", "", t)
+	createCouchbaseBucket(testHost, "saslbucket", "saslpwd", t)
+
+	loadData(testHost, "default", "", 5000, "full", t)
+	loadData(testHost, "saslbucket", "saslpwd", 2500, "full", t)
+
+	exclude_buckets := []string{"default"}
+	config := value.CreateBackupConfig("", "", exclude_buckets,
+		make([]string, 0), make([]string, 0), make([]string, 0),
+		false, false, false, false, false, false)
+
+	a, err := archive.MountArchive(testDir)
+	checkError(err, t)
+
+	checkError(a.CreateBackup("full-backup-test", config), t)
+
+	name, err := backup.Backup(a, "full-backup-test", testHost, restUsername, restPassword,
+		4, false, false)
+	checkError(err, t)
+
+	info, err := a.IncrBackupInfo("full-backup-test", name)
+	checkError(err, t)
+
+	count := info["saslbucket"].NumDocs
+	if count != 2500 {
+		t.Fatal("Expected to backup 2500 items, got " + strconv.Itoa(count))
+	}
+}
