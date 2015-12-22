@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/couchbase/backup"
 	"github.com/couchbase/backup/archive"
 	"github.com/couchbase/backup/couchbase"
 	"github.com/couchbase/backup/value"
@@ -35,7 +34,7 @@ func TestRestoreNoBucketNoBackupConfig(t *testing.T) {
 	checkError(a.CreateBackup(backupName, config), t)
 
 	// Backup the data
-	name, err := backup.Backup(a, backupName, testHost, restUsername, restPassword,
+	name, err := executeBackup(a, backupName, "archive", testHost, restUsername, restPassword,
 		4, false, false)
 	checkError(err, t)
 
@@ -51,8 +50,8 @@ func TestRestoreNoBucketNoBackupConfig(t *testing.T) {
 
 	// Do a restore where the views are the first thing to be restored, make sure
 	// we fail to restore the views because no bucket exists
-	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, "",
-		"", false, config)
+	err = executeRestore(a, backupName, testHost, restUsername, restPassword, "",
+		"", 4, false, config)
 	_, ok := err.(couchbase.BucketNotFoundError)
 	if err == nil || !ok {
 		t.Fatal("Expected BucketNotFoundError")
@@ -63,8 +62,8 @@ func TestRestoreNoBucketNoBackupConfig(t *testing.T) {
 	config = value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
 		false, true, true, false, false, false)
-	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, "",
-		"", false, config)
+	err = executeRestore(a, backupName, testHost, restUsername, restPassword, "",
+		"", 4, false, config)
 	_, ok = err.(couchbase.BucketNotFoundError)
 	if err == nil || !ok {
 		t.Fatal("Expected BucketNotFoundError")
@@ -75,8 +74,8 @@ func TestRestoreNoBucketNoBackupConfig(t *testing.T) {
 	config = value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
 		false, true, true, true, false, false)
-	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, "",
-		"", false, config)
+	err = executeRestore(a, backupName, testHost, restUsername, restPassword, "",
+		"", 4, false, config)
 	_, ok = err.(couchbase.BucketNotFoundError)
 	if err == nil || !ok {
 		t.Fatal("Expected BucketNotFoundError")
@@ -87,8 +86,8 @@ func TestRestoreNoBucketNoBackupConfig(t *testing.T) {
 	config = value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
 		false, true, true, true, true, false)
-	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, "",
-		"", false, config)
+	err = executeRestore(a, backupName, testHost, restUsername, restPassword, "",
+		"", 4, false, config)
 	_, ok = err.(couchbase.BucketNotFoundError)
 	if err == nil || !ok {
 		t.Fatal("Expected BucketNotFoundError")
@@ -118,7 +117,7 @@ func TestRestoreNoBucketWithBackupConfig(t *testing.T) {
 	checkError(a.CreateBackup(backupName, config), t)
 
 	// Backup the data
-	name, err := backup.Backup(a, backupName, testHost, restUsername, restPassword,
+	name, err := executeBackup(a, backupName, "archive", testHost, restUsername, restPassword,
 		4, false, false)
 	checkError(err, t)
 
@@ -132,8 +131,8 @@ func TestRestoreNoBucketWithBackupConfig(t *testing.T) {
 
 	deleteBucket(testHost, "default", t, true)
 
-	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, "",
-		"", false, config)
+	err = executeRestore(a, backupName, testHost, restUsername, restPassword, "",
+		"", 4, false, config)
 	checkError(err, t)
 
 	time.Sleep(5 * time.Second)

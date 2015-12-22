@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/couchbase/backup"
 	"github.com/couchbase/backup/archive"
 	"github.com/couchbase/backup/couchbase"
 	"github.com/couchbase/backup/value"
@@ -30,7 +29,7 @@ func TestBackupBadPassword(t *testing.T) {
 	checkError(a.CreateBackup(backupName, config), t)
 
 	// Test bad password
-	_, err = backup.Backup(a, backupName, testHost, restUsername, "badpassword",
+	_, err = executeBackup(a, backupName, "archive", testHost, restUsername, "badpassword",
 		4, false, false)
 	if err == nil {
 		t.Fatal("Backup succeeded, but expected failure")
@@ -44,7 +43,7 @@ func TestBackupBadPassword(t *testing.T) {
 	}
 
 	// Test bad username
-	_, err = backup.Backup(a, backupName, testHost, "Adminiator", restPassword,
+	_, err = executeBackup(a, backupName, "archive", testHost, "Adminiator", restPassword,
 		4, false, false)
 	if err == nil {
 		t.Fatal("Backup succeeded, but expected failure")
@@ -77,7 +76,7 @@ func TestFullBackup(t *testing.T) {
 
 	checkError(a.CreateBackup("full-backup-test", config), t)
 
-	name, err := backup.Backup(a, "full-backup-test", testHost, restUsername, restPassword,
+	name, err := executeBackup(a, "full-backup-test", "archive", testHost, restUsername, restPassword,
 		4, false, false)
 	checkError(err, t)
 
@@ -115,7 +114,7 @@ func TestIncrementalBackup(t *testing.T) {
 	// Do full backup
 	loadData(testHost, "default", "", 5000, "full", t)
 
-	name1, err := backup.Backup(a, setName, testHost, restUsername, restPassword,
+	name1, err := executeBackup(a, setName, "archive", testHost, restUsername, restPassword,
 		4, false, false)
 
 	info, err := a.IncrBackupInfo(setName, name1)
@@ -129,7 +128,7 @@ func TestIncrementalBackup(t *testing.T) {
 	// Do first incremental backup
 	loadData(testHost, "default", "", 4000, "incr-1-", t)
 
-	name2, err := backup.Backup(a, setName, testHost, restUsername, restPassword,
+	name2, err := executeBackup(a, setName, "archive", testHost, restUsername, restPassword,
 		4, false, false)
 
 	info, err = a.IncrBackupInfo(setName, name2)
@@ -143,7 +142,7 @@ func TestIncrementalBackup(t *testing.T) {
 	// Do second incremental backup
 	loadData(testHost, "default", "", 3000, "incr-2-", t)
 
-	name3, err := backup.Backup(a, setName, testHost, restUsername, restPassword,
+	name3, err := executeBackup(a, setName, "archive", testHost, restUsername, restPassword,
 		4, false, false)
 
 	info, err = a.IncrBackupInfo(setName, name3)
@@ -157,7 +156,7 @@ func TestIncrementalBackup(t *testing.T) {
 	// Do third incremental backup
 	loadData(testHost, "default", "", 2000, "incr-3-", t)
 
-	name4, err := backup.Backup(a, setName, testHost, restUsername, restPassword,
+	name4, err := executeBackup(a, setName, "archive", testHost, restUsername, restPassword,
 		4, false, false)
 
 	info, err = a.IncrBackupInfo(setName, name4)
@@ -173,8 +172,8 @@ func TestIncrementalBackup(t *testing.T) {
 	deleteBucket(testHost, "default", t, true)
 	createCouchbaseBucket(testHost, "default", "", t)
 
-	err = backup.Restore(a, setName, testHost, restUsername, restPassword, "",
-		"", false, config)
+	err = executeRestore(a, setName, testHost, restUsername, restPassword, "",
+		"", 4, false, config)
 	checkError(err, t)
 
 	time.Sleep(5 * time.Second)
@@ -189,8 +188,8 @@ func TestIncrementalBackup(t *testing.T) {
 	deleteBucket(testHost, "default", t, true)
 	createCouchbaseBucket(testHost, "default", "", t)
 
-	err = backup.Restore(a, setName, testHost, restUsername, restPassword, name2,
-		name3, false, config)
+	err = executeRestore(a, setName, testHost, restUsername, restPassword, name2,
+		name3, 4, false, config)
 	checkError(err, t)
 
 	time.Sleep(5 * time.Second)
@@ -205,8 +204,8 @@ func TestIncrementalBackup(t *testing.T) {
 	deleteBucket(testHost, "default", t, true)
 	createCouchbaseBucket(testHost, "default", "", t)
 
-	err = backup.Restore(a, setName, testHost, restUsername, restPassword, name3,
-		"", false, config)
+	err = executeRestore(a, setName, testHost, restUsername, restPassword, name3,
+		"", 4, false, config)
 	checkError(err, t)
 
 	time.Sleep(5 * time.Second)
@@ -221,8 +220,8 @@ func TestIncrementalBackup(t *testing.T) {
 	deleteBucket(testHost, "default", t, true)
 	createCouchbaseBucket(testHost, "default", "", t)
 
-	err = backup.Restore(a, setName, testHost, restUsername, restPassword, "",
-		name2, false, config)
+	err = executeRestore(a, setName, testHost, restUsername, restPassword, "",
+		name2, 4, false, config)
 	checkError(err, t)
 
 	time.Sleep(5 * time.Second)
@@ -248,7 +247,7 @@ func TestBackupNoBucketsExist(t *testing.T) {
 
 	checkError(a.CreateBackup("full-backup-test", config), t)
 
-	name, err := backup.Backup(a, "full-backup-test", testHost, restUsername, restPassword,
+	name, err := executeBackup(a, "full-backup-test", "archive", testHost, restUsername, restPassword,
 		4, false, false)
 	checkError(err, t)
 
@@ -279,7 +278,7 @@ func TestBackupDeleteBucketBackupAgain(t *testing.T) {
 
 	checkError(a.CreateBackup(backupName, config), t)
 
-	name, err := backup.Backup(a, backupName, testHost, restUsername, restPassword,
+	name, err := executeBackup(a, backupName, "archive", testHost, restUsername, restPassword,
 		4, false, false)
 	checkError(err, t)
 
@@ -295,7 +294,7 @@ func TestBackupDeleteBucketBackupAgain(t *testing.T) {
 	createCouchbaseBucket(testHost, "default", "", t)
 	loadData(testHost, "default", "", 10000, "two", t)
 
-	name, err = backup.Backup(a, backupName, testHost, restUsername, restPassword,
+	name, err = executeBackup(a, backupName, "archive", testHost, restUsername, restPassword,
 		4, false, false)
 	checkError(err, t)
 
@@ -328,7 +327,7 @@ func TestBackupWithMemcachedBucket(t *testing.T) {
 
 	checkError(a.CreateBackup(backupName, config), t)
 
-	name, err := backup.Backup(a, backupName, testHost, restUsername, restPassword,
+	name, err := executeBackup(a, backupName, "archive", testHost, restUsername, restPassword,
 		4, false, false)
 	checkError(err, t)
 
@@ -364,7 +363,7 @@ func TestBackupWithIncludeBuckets(t *testing.T) {
 
 	checkError(a.CreateBackup("full-backup-test", config), t)
 
-	name, err := backup.Backup(a, "full-backup-test", testHost, restUsername, restPassword,
+	name, err := executeBackup(a, "full-backup-test", "archive", testHost, restUsername, restPassword,
 		4, false, false)
 	checkError(err, t)
 
@@ -397,7 +396,7 @@ func TestBackupWithExcludeBuckets(t *testing.T) {
 
 	checkError(a.CreateBackup("full-backup-test", config), t)
 
-	name, err := backup.Backup(a, "full-backup-test", testHost, restUsername, restPassword,
+	name, err := executeBackup(a, "full-backup-test", "archive", testHost, restUsername, restPassword,
 		4, false, false)
 	checkError(err, t)
 

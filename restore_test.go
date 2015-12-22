@@ -30,8 +30,8 @@ func TestBackupRestore(t *testing.T) {
 	checkError(a.CreateBackup(backupName, config), t)
 
 	// Test that restoring data when noe exists gives an error
-	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, "name",
-		"name", false, config)
+	err = executeRestore(a, backupName, testHost, restUsername, restPassword, "name",
+		"name", 4, false, config)
 	if err == nil {
 		t.Fatal(err.Error())
 	} else if _, ok := err.(backup.NothingToRestoreError); !ok {
@@ -39,7 +39,7 @@ func TestBackupRestore(t *testing.T) {
 	}
 
 	// Backup the data
-	name, err := backup.Backup(a, backupName, testHost, restUsername, restPassword,
+	name, err := executeBackup(a, backupName, "archive", testHost, restUsername, restPassword,
 		4, false, false)
 	checkError(err, t)
 
@@ -55,8 +55,8 @@ func TestBackupRestore(t *testing.T) {
 	createCouchbaseBucket(testHost, "default", "", t)
 
 	// Check that using an invalid start point causes an error
-	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, "name",
-		name, false, config)
+	err = executeRestore(a, backupName, testHost, restUsername, restPassword, "name",
+		name, 4, false, config)
 	if err == nil {
 		t.Fatal(err.Error())
 	} else if _, ok := err.(backup.RestorePointError); !ok {
@@ -64,8 +64,8 @@ func TestBackupRestore(t *testing.T) {
 	}
 
 	// Check that using an invalid end point causes an error
-	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, name,
-		"end", false, config)
+	err = executeRestore(a, backupName, testHost, restUsername, restPassword, name,
+		"end", 4, false, config)
 	if err == nil {
 		t.Fatal(err.Error())
 	} else if _, ok := err.(backup.RestorePointError); !ok {
@@ -73,8 +73,8 @@ func TestBackupRestore(t *testing.T) {
 	}
 
 	// Restore the data using explicit start/end specification
-	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, name,
-		name, false, config)
+	err = executeRestore(a, backupName, testHost, restUsername, restPassword, name,
+		name, 4, false, config)
 	checkError(err, t)
 
 	time.Sleep(5 * time.Second)
@@ -90,8 +90,8 @@ func TestBackupRestore(t *testing.T) {
 	createCouchbaseBucket(testHost, "default", "", t)
 
 	// Restore the data without explicitly setting the start/end point
-	err = backup.Restore(a, backupName, testHost, restUsername, restPassword, "",
-		"", false, config)
+	err = executeRestore(a, backupName, testHost, restUsername, restPassword, "",
+		"", 4, false, config)
 	checkError(err, t)
 
 	time.Sleep(5 * time.Second)

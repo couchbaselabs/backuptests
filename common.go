@@ -11,6 +11,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/couchbase/backup"
+	"github.com/couchbase/backup/archive"
 	"github.com/couchbase/backup/couchbase"
 	"github.com/couchbase/backup/value"
 	"github.com/couchbase/gocb"
@@ -34,6 +36,29 @@ func checkError(err error, t *testing.T) {
 			t.FailNow()
 		}
 	}
+}
+
+func executeBackup(a *archive.Archive, name, sink, host, user, pwd string, threads int,
+	resume, purge bool) (string, error) {
+	t, name, err := backup.Backup(a, name, sink, host, user, pwd, threads, resume, purge)
+	if err != nil {
+		return name, err
+	}
+
+	err = t.Execute()
+	return name, err
+}
+
+func executeRestore(a *archive.Archive, name, host, user, pwd, start, end string, threads int,
+	force bool, config *value.BackupConfig) error {
+	t, err := backup.Restore(a, name, host, user, pwd, start, end, threads, false, config)
+	for _, restore := range t {
+		err = restore.Execute()
+		if err != nil {
+			return err
+		}
+	}
+	return err
 }
 
 func loadData(host string, bucket string, password string, items int,
