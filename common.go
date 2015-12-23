@@ -40,7 +40,8 @@ func checkError(err error, t *testing.T) {
 
 func executeBackup(a *archive.Archive, name, sink, host, user, pwd string, threads int,
 	resume, purge bool) (string, error) {
-	t, name, err := backup.Backup(a, name, sink, host, user, pwd, threads, resume, purge)
+	t, name, err := backup.CouchbaseToArchiveTransferable(a, name, host, user, pwd,
+		threads, resume, purge)
 	if err != nil {
 		return name, err
 	}
@@ -51,7 +52,8 @@ func executeBackup(a *archive.Archive, name, sink, host, user, pwd string, threa
 
 func executeRestore(a *archive.Archive, name, host, user, pwd, start, end string, threads int,
 	force bool, config *value.BackupConfig) error {
-	t, err := backup.Restore(a, name, host, user, pwd, start, end, threads, false, config)
+	t, err := backup.ArchiveToCouchbaseTransferable(a, name, host, user, pwd, start, end,
+		threads, false, config)
 	for _, restore := range t {
 		err = restore.Execute()
 		if err != nil {
