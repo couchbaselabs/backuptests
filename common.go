@@ -40,14 +40,14 @@ func checkError(err error, t *testing.T) {
 
 func executeBackup(a *archive.Archive, name, sink, host, user, pwd string, threads int,
 	resume, purge bool) (string, error) {
-	t, name, err := backup.CouchbaseToArchiveTransferable(a, name, host, user, pwd,
+	t, err := backup.CouchbaseToArchiveTransferable(a, name, host, user, pwd,
 		threads, resume, purge)
 	if err != nil {
-		return name, err
+		return "", err
 	}
 
 	err = t.Execute()
-	return name, err
+	return t.Name(), err
 }
 
 func executeRestore(a *archive.Archive, name, host, user, pwd, start, end string, threads int,
