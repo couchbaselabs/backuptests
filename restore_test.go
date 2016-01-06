@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/couchbase/backup"
 	"github.com/couchbase/backup/archive"
 	"github.com/couchbase/backup/value"
 )
@@ -34,7 +33,7 @@ func TestBackupRestore(t *testing.T) {
 		"name", 4, false, config)
 	if err == nil {
 		t.Fatal(err.Error())
-	} else if _, ok := err.(backup.NothingToRestoreError); !ok {
+	} else if _, ok := err.(archive.EmptyRangeError); !ok {
 		t.Fatal(err.Error())
 	}
 
@@ -59,7 +58,7 @@ func TestBackupRestore(t *testing.T) {
 		name, 4, false, config)
 	if err == nil {
 		t.Fatal(err.Error())
-	} else if _, ok := err.(backup.RestorePointError); !ok {
+	} else if _, ok := err.(archive.RangePointError); !ok {
 		t.Fatal(err.Error())
 	}
 
@@ -68,7 +67,7 @@ func TestBackupRestore(t *testing.T) {
 		"end", 4, false, config)
 	if err == nil {
 		t.Fatal(err.Error())
-	} else if _, ok := err.(backup.RestorePointError); !ok {
+	} else if _, ok := err.(archive.RangePointError); !ok {
 		t.Fatal(err.Error())
 	}
 
