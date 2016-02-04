@@ -12,6 +12,7 @@ import (
 func TestBackupRestore(t *testing.T) {
 	defer cleanup()
 	defer deleteAllBuckets(testHost, t)
+	cleanup()
 	deleteAllBuckets(testHost, t)
 	createCouchbaseBucket(testHost, "default", "", t)
 
@@ -23,7 +24,7 @@ func TestBackupRestore(t *testing.T) {
 		make([]string, 0), make([]string, 0), make([]string, 0),
 		false, false, false, false, false, false)
 
-	a, err := archive.MountArchive(testDir)
+	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
 	checkError(a.CreateBackup(backupName, config), t)

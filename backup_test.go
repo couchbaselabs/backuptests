@@ -13,6 +13,7 @@ import (
 func TestBackupBadPassword(t *testing.T) {
 	defer cleanup()
 	defer deleteAllBuckets(testHost, t)
+	cleanup()
 	deleteAllBuckets(testHost, t)
 	createCouchbaseBucket(testHost, "default", "", t)
 
@@ -23,7 +24,7 @@ func TestBackupBadPassword(t *testing.T) {
 		make([]string, 0), make([]string, 0), make([]string, 0),
 		false, false, false, false, false, false)
 
-	a, err := archive.MountArchive(testDir)
+	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
 	checkError(a.CreateBackup(backupName, config), t)
@@ -60,6 +61,7 @@ func TestBackupBadPassword(t *testing.T) {
 func TestFullBackup(t *testing.T) {
 	defer cleanup()
 	defer deleteAllBuckets(testHost, t)
+	cleanup()
 	deleteAllBuckets(testHost, t)
 	createCouchbaseBucket(testHost, "default", "", t)
 	createCouchbaseBucket(testHost, "saslbucket", "saslpwd", t)
@@ -71,7 +73,7 @@ func TestFullBackup(t *testing.T) {
 		make([]string, 0), make([]string, 0), make([]string, 0),
 		false, false, false, false, false, false)
 
-	a, err := archive.MountArchive(testDir)
+	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
 	checkError(a.CreateBackup("full-backup-test", config), t)
@@ -97,6 +99,7 @@ func TestFullBackup(t *testing.T) {
 func TestIncrementalBackup(t *testing.T) {
 	defer cleanup()
 	defer deleteAllBuckets(testHost, t)
+	cleanup()
 	deleteAllBuckets(testHost, t)
 	createCouchbaseBucket(testHost, "default", "", t)
 
@@ -106,7 +109,7 @@ func TestIncrementalBackup(t *testing.T) {
 		make([]string, 0), make([]string, 0), make([]string, 0),
 		false, false, false, false, false, false)
 
-	a, err := archive.MountArchive(testDir)
+	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
 	checkError(a.CreateBackup(setName, config), t)
@@ -236,13 +239,14 @@ func TestIncrementalBackup(t *testing.T) {
 func TestBackupNoBucketsExist(t *testing.T) {
 	defer cleanup()
 	defer deleteAllBuckets(testHost, t)
+	cleanup()
 	deleteAllBuckets(testHost, t)
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
 		false, false, false, false, false, false)
 
-	a, err := archive.MountArchive(testDir)
+	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
 	checkError(a.CreateBackup("full-backup-test", config), t)
@@ -262,6 +266,7 @@ func TestBackupNoBucketsExist(t *testing.T) {
 func TestBackupDeleteBucketBackupAgain(t *testing.T) {
 	defer cleanup()
 	defer deleteAllBuckets(testHost, t)
+	cleanup()
 	deleteAllBuckets(testHost, t)
 	createCouchbaseBucket(testHost, "default", "", t)
 
@@ -273,7 +278,7 @@ func TestBackupDeleteBucketBackupAgain(t *testing.T) {
 		make([]string, 0), make([]string, 0), make([]string, 0),
 		false, false, false, false, false, false)
 
-	a, err := archive.MountArchive(testDir)
+	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
 	checkError(a.CreateBackup(backupName, config), t)
@@ -310,6 +315,7 @@ func TestBackupDeleteBucketBackupAgain(t *testing.T) {
 func TestBackupWithMemcachedBucket(t *testing.T) {
 	defer cleanup()
 	defer deleteAllBuckets(testHost, t)
+	cleanup()
 	deleteAllBuckets(testHost, t)
 	createCouchbaseBucket(testHost, "default", "", t)
 	createMemcachedBucket(testHost, "mcd", "", t)
@@ -322,7 +328,7 @@ func TestBackupWithMemcachedBucket(t *testing.T) {
 		make([]string, 0), make([]string, 0), make([]string, 0),
 		false, false, false, false, false, false)
 
-	a, err := archive.MountArchive(testDir)
+	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
 	checkError(a.CreateBackup(backupName, config), t)
@@ -346,6 +352,7 @@ func TestBackupWithMemcachedBucket(t *testing.T) {
 func TestBackupWithIncludeBuckets(t *testing.T) {
 	defer cleanup()
 	defer deleteAllBuckets(testHost, t)
+	cleanup()
 	deleteAllBuckets(testHost, t)
 	createCouchbaseBucket(testHost, "default", "", t)
 	createCouchbaseBucket(testHost, "saslbucket", "saslpwd", t)
@@ -358,7 +365,7 @@ func TestBackupWithIncludeBuckets(t *testing.T) {
 		include_buckets, make([]string, 0), make([]string, 0),
 		false, false, false, false, false, false)
 
-	a, err := archive.MountArchive(testDir)
+	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
 	checkError(a.CreateBackup("full-backup-test", config), t)
@@ -379,6 +386,7 @@ func TestBackupWithIncludeBuckets(t *testing.T) {
 func TestBackupWithExcludeBuckets(t *testing.T) {
 	defer cleanup()
 	defer deleteAllBuckets(testHost, t)
+	cleanup()
 	deleteAllBuckets(testHost, t)
 	createCouchbaseBucket(testHost, "default", "", t)
 	createCouchbaseBucket(testHost, "saslbucket", "saslpwd", t)
@@ -391,7 +399,7 @@ func TestBackupWithExcludeBuckets(t *testing.T) {
 		make([]string, 0), make([]string, 0), make([]string, 0),
 		false, false, false, false, false, false)
 
-	a, err := archive.MountArchive(testDir)
+	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
 	checkError(a.CreateBackup("full-backup-test", config), t)
