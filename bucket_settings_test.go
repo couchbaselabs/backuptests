@@ -3,7 +3,6 @@ package tests
 import (
 	"strconv"
 	"testing"
-	"time"
 
 	"github.com/couchbase/backup/archive"
 	"github.com/couchbase/backup/couchbase"
@@ -92,56 +91,5 @@ func TestRestoreNoBucketNoBackupConfig(t *testing.T) {
 	_, ok = err.(couchbase.BucketNotFoundError)
 	if err == nil || !ok {
 		t.Fatal("Expected BucketNotFoundError")
-	}
-}
-
-// Test that when we have no bucket, but do have a bucket config that we create a new
-// bucket and can properly restore all data.
-func TestRestoreNoBucketWithBackupConfig(t *testing.T) {
-	defer cleanup()
-	defer deleteAllBuckets(testHost, t)
-	cleanup()
-	deleteAllBuckets(testHost, t)
-	createCouchbaseBucket(testHost, "default", "", t)
-
-	backupName := "bucket-config-test"
-
-	loadData(testHost, "default", "", 5000, "full", t)
-	loadViews(testHost, "default", "first", 12, 2, t)
-
-	config := value.CreateBackupConfig("", "", make([]string, 0),
-		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false)
-
-	a, err := archive.MountArchive(testDir, true)
-	checkError(err, t)
-
-	checkError(a.CreateBackup(backupName, config), t)
-
-	// Backup the data
-	name, err := executeBackup(a, backupName, "archive", testHost, restUsername, restPassword,
-		4, false, false)
-	checkError(err, t)
-
-	info, err := a.IncrBackupInfo(backupName, name)
-	checkError(err, t)
-
-	count := info["default"].NumDocs
-	if count != 5000 {
-		t.Fatal("Expected to backup 5000 items, got " + strconv.Itoa(count))
-	}
-
-	deleteBucket(testHost, "default", t, true)
-
-	err = executeRestore(a, backupName, testHost, restUsername, restPassword, "",
-		"", 4, false, config)
-	checkError(err, t)
-
-	time.Sleep(5 * time.Second)
-	items, err := getNumItems(testHost, restUsername, restPassword, "default")
-	checkError(err, t)
-
-	if items != 5000 {
-		t.Fatalf("Expected 5000 items, got %d", items)
 	}
 }
