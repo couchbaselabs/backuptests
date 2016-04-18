@@ -26,7 +26,7 @@ func TestRestoreNoBucketNoBackupConfig(t *testing.T) {
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, true, false, false, false, false)
+		false, true, false, false, false, false, false, false)
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
@@ -61,7 +61,7 @@ func TestRestoreNoBucketNoBackupConfig(t *testing.T) {
 	// sure we fail to restore the gsi indexes because no bucket exists
 	config = value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, true, true, false, false, false)
+		false, true, true, false, false, false, false, false)
 	err = executeRestore(a, backupName, testHost, restUsername, restPassword, "",
 		"", 4, false, config)
 	_, ok = err.(couchbase.BucketNotFoundError)
@@ -73,7 +73,7 @@ func TestRestoreNoBucketNoBackupConfig(t *testing.T) {
 	// make sure we fail to restore the full text indexes because no bucket exists
 	config = value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, true, true, true, false, false)
+		false, true, true, true, false, false, false, false)
 	err = executeRestore(a, backupName, testHost, restUsername, restPassword, "",
 		"", 4, false, config)
 	_, ok = err.(couchbase.BucketNotFoundError)
@@ -85,7 +85,7 @@ func TestRestoreNoBucketNoBackupConfig(t *testing.T) {
 	// to restore the data because no bucket exists
 	config = value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, true, true, true, true, false)
+		false, true, true, true, true, false, false, false)
 	err = executeRestore(a, backupName, testHost, restUsername, restPassword, "",
 		"", 4, false, config)
 	_, ok = err.(couchbase.BucketNotFoundError)

@@ -40,8 +40,8 @@ func checkError(err error, t *testing.T) {
 
 func executeBackup(a *archive.Archive, name, sink, host, user, pwd string, threads int,
 	resume, purge bool) (string, error) {
-	t, err := backup.CouchbaseToArchiveTransferable(a, name, host, user, pwd,
-		threads, resume, purge)
+	t, err := backup.CouchbaseToArchiveTransferable(a, name, host, user, pwd, "",
+		threads, resume, purge, nil)
 	if err != nil {
 		return "", err
 	}
@@ -52,8 +52,8 @@ func executeBackup(a *archive.Archive, name, sink, host, user, pwd string, threa
 
 func executeRestore(a *archive.Archive, name, host, user, pwd, start, end string, threads int,
 	force bool, config *value.BackupConfig) error {
-	t, err := backup.ArchiveToCouchbaseTransferable(a, name, host, user, pwd, start, end,
-		threads, false, config)
+	t, err := backup.ArchiveToCouchbaseTransferable(a, name, host, user, pwd, start, end, "",
+		threads, false, nil, config)
 	for _, restore := range t {
 		err = restore.Execute()
 		if err != nil {
@@ -86,7 +86,7 @@ func loadData(host string, bucket string, password string, items int,
 }
 
 func loadViews(host, bucket, prefix string, numDDocs, numViews int, t *testing.T) {
-	rest := couchbase.CreateRestClient(testHost, restUsername, restPassword)
+	rest := couchbase.CreateRestClient(testHost, restUsername, restPassword, nil)
 	ddocs := make([]value.DDoc, 0)
 
 	for i := 0; i < numDDocs; i++ {

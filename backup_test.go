@@ -22,7 +22,7 @@ func TestBackupBadPassword(t *testing.T) {
 	backupName := "badpassword-test"
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false)
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
@@ -71,7 +71,7 @@ func TestFullBackup(t *testing.T) {
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false)
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
@@ -107,7 +107,7 @@ func TestIncrementalBackup(t *testing.T) {
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false)
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
@@ -244,7 +244,7 @@ func TestBackupNoBucketsExist(t *testing.T) {
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false)
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
@@ -276,7 +276,7 @@ func TestBackupDeleteBucketBackupAgain(t *testing.T) {
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false)
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
@@ -326,7 +326,7 @@ func TestBackupWithMemcachedBucket(t *testing.T) {
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false)
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
@@ -363,7 +363,7 @@ func TestBackupWithIncludeBuckets(t *testing.T) {
 	include_buckets := []string{"default"}
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		include_buckets, make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false)
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
@@ -397,7 +397,7 @@ func TestBackupWithExcludeBuckets(t *testing.T) {
 	exclude_buckets := []string{"default"}
 	config := value.CreateBackupConfig("", "", exclude_buckets,
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false)
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
