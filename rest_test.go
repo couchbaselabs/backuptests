@@ -13,7 +13,7 @@ func TestGetPutViews(t *testing.T) {
 	deleteAllBuckets(testHost, t)
 	createCouchbaseBucket(testHost, bucket, "", t)
 
-	rest := couchbase.CreateRestClient(testHost, restUsername, restPassword, false)
+	rest := couchbase.CreateRestClient(testHost, restUsername, restPassword, nil)
 	ddocs := make([]value.DDoc, 0)
 
 	single := make(map[string]map[string]map[string]string)

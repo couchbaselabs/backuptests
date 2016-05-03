@@ -18,7 +18,7 @@ func TestMerge(t *testing.T) {
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false)
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
