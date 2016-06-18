@@ -53,7 +53,7 @@ func executeBackup(a *archive.Archive, name, sink, host, user, pwd string, threa
 func executeRestore(a *archive.Archive, name, host, user, pwd, start, end string, threads int,
 	force bool, config *value.BackupConfig) error {
 	t, err := backup.ArchiveToCouchbaseTransferable(a, name, host, user, pwd, start, end, "",
-		threads, false, nil, config)
+		threads, false, make(map[string]string), nil, config)
 	for _, restore := range t {
 		err = restore.Execute()
 		if err != nil {
