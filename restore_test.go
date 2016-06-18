@@ -29,7 +29,7 @@ func TestBackupRestore(t *testing.T) {
 
 	checkError(a.CreateBackup(backupName, config), t)
 
-	// Test that restoring data when noe exists gives an error
+	// Test that restoring data when none exists gives an error
 	err = executeRestore(a, backupName, testHost, restUsername, restPassword, "name",
 		"name", 4, false, config)
 	if err == nil {
