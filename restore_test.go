@@ -18,7 +18,7 @@ func TestBackupRestore(t *testing.T) {
 
 	backupName := "restore-test"
 
-	loadData(testHost, "default", "", 5000, "full", t)
+	loadData(testHost, "default", "", 5000, "full", false, t)
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),

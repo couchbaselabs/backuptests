@@ -17,7 +17,7 @@ func TestBackupBadPassword(t *testing.T) {
 	deleteAllBuckets(testHost, t)
 	createCouchbaseBucket(testHost, "default", "", t)
 
-	loadData(testHost, "default", "", 5000, "full", t)
+	loadData(testHost, "default", "", 5000, "full", false, t)
 
 	backupName := "badpassword-test"
 	config := value.CreateBackupConfig("", "", make([]string, 0),
@@ -66,8 +66,8 @@ func TestFullBackup(t *testing.T) {
 	createCouchbaseBucket(testHost, "default", "", t)
 	createCouchbaseBucket(testHost, "saslbucket", "saslpwd", t)
 
-	loadData(testHost, "default", "", 5000, "full", t)
-	loadData(testHost, "saslbucket", "saslpwd", 2500, "full", t)
+	loadData(testHost, "default", "", 5000, "full", false, t)
+	loadData(testHost, "saslbucket", "saslpwd", 2500, "full", false, t)
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
@@ -115,7 +115,7 @@ func TestIncrementalBackup(t *testing.T) {
 	checkError(a.CreateBackup(setName, config), t)
 
 	// Do full backup
-	loadData(testHost, "default", "", 5000, "full", t)
+	loadData(testHost, "default", "", 5000, "full", false, t)
 
 	name1, err := executeBackup(a, setName, "archive", testHost, restUsername, restPassword,
 		4, false, false)
@@ -129,7 +129,7 @@ func TestIncrementalBackup(t *testing.T) {
 	}
 
 	// Do first incremental backup
-	loadData(testHost, "default", "", 4000, "incr-1-", t)
+	loadData(testHost, "default", "", 4000, "incr-1-", false, t)
 
 	name2, err := executeBackup(a, setName, "archive", testHost, restUsername, restPassword,
 		4, false, false)
@@ -143,7 +143,7 @@ func TestIncrementalBackup(t *testing.T) {
 	}
 
 	// Do second incremental backup
-	loadData(testHost, "default", "", 3000, "incr-2-", t)
+	loadData(testHost, "default", "", 3000, "incr-2-", false, t)
 
 	name3, err := executeBackup(a, setName, "archive", testHost, restUsername, restPassword,
 		4, false, false)
@@ -157,7 +157,7 @@ func TestIncrementalBackup(t *testing.T) {
 	}
 
 	// Do third incremental backup
-	loadData(testHost, "default", "", 2000, "incr-3-", t)
+	loadData(testHost, "default", "", 2000, "incr-3-", false, t)
 
 	name4, err := executeBackup(a, setName, "archive", testHost, restUsername, restPassword,
 		4, false, false)
@@ -272,7 +272,7 @@ func TestBackupDeleteBucketBackupAgain(t *testing.T) {
 
 	backupName := "backupdelbackup-test"
 
-	loadData(testHost, "default", "", 5000, "one", t)
+	loadData(testHost, "default", "", 5000, "one", false, t)
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
@@ -297,7 +297,7 @@ func TestBackupDeleteBucketBackupAgain(t *testing.T) {
 
 	deleteAllBuckets(testHost, t)
 	createCouchbaseBucket(testHost, "default", "", t)
-	loadData(testHost, "default", "", 10000, "two", t)
+	loadData(testHost, "default", "", 10000, "two", false, t)
 
 	name, err = executeBackup(a, backupName, "archive", testHost, restUsername, restPassword,
 		4, false, false)
@@ -322,7 +322,7 @@ func TestBackupWithMemcachedBucket(t *testing.T) {
 
 	backupName := "skip-mcd-bucket-test"
 
-	loadData(testHost, "default", "", 5000, "one", t)
+	loadData(testHost, "default", "", 5000, "one", false, t)
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
@@ -357,8 +357,8 @@ func TestBackupWithIncludeBuckets(t *testing.T) {
 	createCouchbaseBucket(testHost, "default", "", t)
 	createCouchbaseBucket(testHost, "saslbucket", "saslpwd", t)
 
-	loadData(testHost, "default", "", 5000, "full", t)
-	loadData(testHost, "saslbucket", "saslpwd", 2500, "full", t)
+	loadData(testHost, "default", "", 5000, "full", false, t)
+	loadData(testHost, "saslbucket", "saslpwd", 2500, "full", false, t)
 
 	include_buckets := []string{"default"}
 	config := value.CreateBackupConfig("", "", make([]string, 0),
@@ -391,8 +391,8 @@ func TestBackupWithExcludeBuckets(t *testing.T) {
 	createCouchbaseBucket(testHost, "default", "", t)
 	createCouchbaseBucket(testHost, "saslbucket", "saslpwd", t)
 
-	loadData(testHost, "default", "", 5000, "full", t)
-	loadData(testHost, "saslbucket", "saslpwd", 2500, "full", t)
+	loadData(testHost, "default", "", 5000, "full", false, t)
+	loadData(testHost, "saslbucket", "saslpwd", 2500, "full", false, t)
 
 	exclude_buckets := []string{"default"}
 	config := value.CreateBackupConfig("", "", exclude_buckets,

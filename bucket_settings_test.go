@@ -21,7 +21,7 @@ func TestRestoreNoBucketNoBackupConfig(t *testing.T) {
 
 	backupName := "bucket-config-test"
 
-	loadData(testHost, "default", "", 5000, "full", t)
+	loadData(testHost, "default", "", 5000, "full", false, t)
 	loadViews(testHost, "default", "first", 12, 2, t)
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),

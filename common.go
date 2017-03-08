@@ -14,6 +14,7 @@ import (
 	"github.com/couchbase/backup"
 	"github.com/couchbase/backup/archive"
 	"github.com/couchbase/backup/couchbase"
+	"github.com/couchbase/backup/plan"
 	"github.com/couchbase/backup/value"
 	"github.com/couchbase/gocb"
 )
@@ -41,7 +42,7 @@ func checkError(err error, t *testing.T) {
 func executeBackup(a *archive.Archive, name, sink, host, user, pwd string, threads int,
 	resume, purge bool) (string, error) {
 	t, err := backup.CouchbaseToArchiveTransferable(a, name, host, user, pwd, "",
-		threads, resume, purge, nil)
+		(string)(plan.COMPRESSION_POLICY_UNCHANGED), threads, resume, purge, nil)
 	if err != nil {
 		return "", err
 	}
@@ -53,7 +54,7 @@ func executeBackup(a *archive.Archive, name, sink, host, user, pwd string, threa
 func executeRestore(a *archive.Archive, name, host, user, pwd, start, end string, threads int,
 	force bool, config *value.BackupConfig) error {
 	t, err := backup.ArchiveToCouchbaseTransferable(a, name, host, user, pwd, start, end, "",
-		threads, false, make(map[string]string), nil, config)
+		threads, false, false, make(map[string]string), nil, config)
 	for _, restore := range t {
 		err = restore.Execute()
 		if err != nil {
@@ -64,7 +65,7 @@ func executeRestore(a *archive.Archive, name, host, user, pwd, start, end string
 }
 
 func loadData(host string, bucket string, password string, items int,
-	prefix string, t *testing.T) {
+	prefix string, delete bool, t *testing.T) {
 	connection, err := gocb.Connect(host)
 	if err != nil {
 		t.Fatal("Test data loader cannot connect to the cluster: " + err.Error())
@@ -76,9 +77,16 @@ func loadData(host string, bucket string, password string, items int,
 
 	for i := 0; i < items; i++ {
 		key := prefix + strconv.Itoa(i)
-		_, err := b.Insert(key, map[string]interface{}{"x": i}, 0)
-		if err != nil {
-			t.Fatal("Error setting `" + key + "`, " + err.Error())
+		if delete {
+			_, err := b.Remove(key, 0)
+			if err != nil {
+				t.Fatal("Error deleting `" + key + "`, " + err.Error())
+			}
+		} else {
+			_, err := b.Insert(key, map[string]interface{}{"x": i}, 0)
+			if err != nil {
+				t.Fatal("Error setting `" + key + "`, " + err.Error())
+			}
 		}
 	}
 
