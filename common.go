@@ -71,7 +71,7 @@ func loadData(host, username, password, bucket string, items int,
 		t.Fatal("Test data loader cannot connect to the cluster: " + err.Error())
 	}
 
-	connection.Authenticate(gocb.RbacAuthenticator{
+	connection.Authenticate(gocb.PasswordAuthenticator{
 		Username: username,
 		Password: password,
 	})
@@ -228,7 +228,7 @@ func deleteAllBuckets(host string, t *testing.T) {
 		t.Fatal("Unable to connect to cluster: " + err.Error())
 	}
 
-	connection.Authenticate(gocb.RbacAuthenticator{
+	connection.Authenticate(gocb.PasswordAuthenticator{
 		Username: rbacUsername,
 		Password: rbacPassword,
 	})
