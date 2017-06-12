@@ -139,7 +139,8 @@ func TestMergeAfterPurge(t *testing.T) {
 	loadData(testHost, rbacUsername, rbacPassword, "default", 10000, "incr-1-", true, t)
 	loadData(testHost, rbacUsername, rbacPassword, "default", 10000, "incr-1-extra-", false, t)
 
-	cmd := "/Users/mikewied/couchbase/watson/ep-engine/management/cbcompact"
+	cmd := "/Users/mikewied/couchbase/spock/kv_engine/engines/ep/management/cbcompact"
+
 	for vbid := 0; vbid < 1024; vbid++ {
 		args := []string{"127.0.0.1:12000", "compact", strconv.Itoa(vbid), "-b", "default",
 			"-u", "Administrator", "-p", "password", "--purge-only-upto-seq", "100000",
