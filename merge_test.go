@@ -161,7 +161,24 @@ func TestMergeAfterPurge(t *testing.T) {
 	checkError(err, t)
 
 	count = info["default"].NumDocs
-	if count != 20000 {
-		t.Fatalf("Expected to backup 20000 items, got %d", count)
+	if count != 30000 {
+		t.Fatalf("Expected to backup 30000 items, got %d", count)
+	}
+
+	// Merge the backups and make sure all the items show up in the merged backup
+	_, err = a.MergeIncrBackups(setName, name1, name2)
+	checkError(err, t)
+
+	info, err = a.IncrBackupInfo(setName, name2)
+	checkError(err, t)
+
+	count = info["default"].NumDocs
+	if count != 30000 {
+		t.Fatalf("Expected to backup 30000 items, got %d", count)
+	}
+
+	binfo, err := a.BackupInfo(setName)
+	if binfo.NumIncrBackups != 1 {
+		t.Fatalf("Expected 1 incr backups after merge, got %d", count)
 	}
 }
