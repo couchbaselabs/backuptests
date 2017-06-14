@@ -29,9 +29,9 @@ func TestMerge(t *testing.T) {
 	checkError(a.CreateBackup(setName, config), t)
 
 	// Do full backup
-	loadData(testHost, "default", "", 5000, "full", false, t)
+	loadData(testHost, rbacUsername, rbacPassword, "default", 5000, "full", false, t)
 
-	name1, err := executeBackup(a, setName, "archive", testHost, restUsername, restPassword,
+	name1, err := executeBackup(a, setName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 
 	info, err := a.IncrBackupInfo(setName, name1)
@@ -43,9 +43,9 @@ func TestMerge(t *testing.T) {
 	}
 
 	// Do first incremental backup
-	loadData(testHost, "default", "", 4000, "incr-1-", false, t)
+	loadData(testHost, rbacUsername, rbacPassword, "default", 4000, "incr-1-", false, t)
 
-	name2, err := executeBackup(a, setName, "archive", testHost, restUsername, restPassword,
+	name2, err := executeBackup(a, setName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 
 	info, err = a.IncrBackupInfo(setName, name2)
@@ -57,9 +57,9 @@ func TestMerge(t *testing.T) {
 	}
 
 	// Do second incremental backup
-	loadData(testHost, "default", "", 3000, "incr-2-", false, t)
+	loadData(testHost, rbacUsername, rbacPassword, "default", 3000, "incr-2-", false, t)
 
-	name3, err := executeBackup(a, setName, "archive", testHost, restUsername, restPassword,
+	name3, err := executeBackup(a, setName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 
 	info, err = a.IncrBackupInfo(setName, name3)
@@ -71,9 +71,9 @@ func TestMerge(t *testing.T) {
 	}
 
 	// Do third incremental backup
-	loadData(testHost, "default", "", 2000, "incr-3-", false, t)
+	loadData(testHost, rbacUsername, rbacPassword, "default", 2000, "incr-3-", false, t)
 
-	name4, err := executeBackup(a, setName, "archive", testHost, restUsername, restPassword,
+	name4, err := executeBackup(a, setName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 
 	info, err = a.IncrBackupInfo(setName, name4)
@@ -121,9 +121,9 @@ func TestMergeAfterPurge(t *testing.T) {
 	checkError(a.CreateBackup(setName, config), t)
 
 	// Do full backup
-	loadData(testHost, "default", "", 10000, "full", false, t)
+	loadData(testHost, rbacUsername, rbacPassword, "default", 10000, "full", false, t)
 
-	name1, err := executeBackup(a, setName, "archive", testHost, restUsername, restPassword,
+	name1, err := executeBackup(a, setName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 
 	info, err := a.IncrBackupInfo(setName, name1)
@@ -135,14 +135,15 @@ func TestMergeAfterPurge(t *testing.T) {
 	}
 
 	// Do incremental backup after purge
-	loadData(testHost, "default", "", 15000, "incr-1-", false, t)
-	loadData(testHost, "default", "", 10000, "incr-1-", true, t)
-	loadData(testHost, "default", "", 5000, "incr-2-", false, t)
+	loadData(testHost, rbacUsername, rbacPassword, "default", 15000, "incr-1-", false, t)
+	loadData(testHost, rbacUsername, rbacPassword, "default", 10000, "incr-1-", true, t)
+	loadData(testHost, rbacUsername, rbacPassword, "default", 10000, "incr-1-extra-", false, t)
 
 	cmd := "/Users/mikewied/couchbase/watson/ep-engine/management/cbcompact"
 	for vbid := 0; vbid < 1024; vbid++ {
 		args := []string{"127.0.0.1:12000", "compact", strconv.Itoa(vbid), "-b", "default",
-			"--purge-only-upto-seq", "100000", "--dropdeletes"}
+			"-u", "Administrator", "-p", "password", "--purge-only-upto-seq", "100000",
+			"--dropdeletes"}
 		if err := exec.Command(cmd, args...).Run(); err != nil {
 			t.Fatal(err.Error())
 		}
@@ -150,7 +151,9 @@ func TestMergeAfterPurge(t *testing.T) {
 
 	time.Sleep(5 * time.Second)
 
-	name2, err := executeBackup(a, setName, "archive", testHost, restUsername, restPassword,
+	loadData(testHost, rbacUsername, rbacPassword, "default", 5000, "incr-1-final", false, t)
+
+	name2, err := executeBackup(a, setName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 
 	info, err = a.IncrBackupInfo(setName, name2)

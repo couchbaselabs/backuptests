@@ -21,8 +21,8 @@ import (
 
 const testDir string = "/tmp/backup-test"
 const testHost = "http://127.0.0.1:9000"
-const restUsername = "Administrator"
-const restPassword = "password"
+const rbacUsername = "Administrator"
+const rbacPassword = "password"
 
 func cleanup() {
 	os.RemoveAll(testDir)
@@ -54,7 +54,7 @@ func executeBackup(a *archive.Archive, name, sink, host, user, pwd string, threa
 func executeRestore(a *archive.Archive, name, host, user, pwd, start, end string, threads int,
 	force bool, config *value.BackupConfig) error {
 	t, err := backup.ArchiveToCouchbaseTransferable(a, name, host, user, pwd, start, end, "",
-		threads, false, false, make(map[string]string), nil, config)
+		threads, false, false, make(map[string]string), "none", 0, nil, config)
 	for _, restore := range t {
 		err = restore.Execute()
 		if err != nil {
@@ -64,13 +64,19 @@ func executeRestore(a *archive.Archive, name, host, user, pwd, start, end string
 	return err
 }
 
-func loadData(host string, bucket string, password string, items int,
+func loadData(host, username, password, bucket string, items int,
 	prefix string, delete bool, t *testing.T) {
 	connection, err := gocb.Connect(host)
 	if err != nil {
 		t.Fatal("Test data loader cannot connect to the cluster: " + err.Error())
 	}
-	b, err := connection.OpenBucket(bucket, password)
+
+	connection.Authenticate(gocb.RbacAuthenticator{
+		Username: username,
+		Password: password,
+	})
+
+	b, err := connection.OpenBucket(bucket, "")
 	if err != nil {
 		t.Fatal("Test data loader cannot connect to the bucket: " + err.Error())
 	}
@@ -94,7 +100,7 @@ func loadData(host string, bucket string, password string, items int,
 }
 
 func loadViews(host, bucket, prefix string, numDDocs, numViews int, t *testing.T) {
-	rest := couchbase.CreateRestClient(testHost, restUsername, restPassword, nil)
+	rest := couchbase.CreateRestClient(testHost, rbacUsername, rbacPassword, nil)
 	ddocs := make([]value.DDoc, 0)
 
 	for i := 0; i < numDDocs; i++ {
@@ -136,7 +142,6 @@ func createCouchbaseBucket(host, bucket, password string, t *testing.T) {
 		FlushEnabled:  false,
 		IndexReplicas: false,
 		Name:          bucket,
-		Password:      password,
 		Quota:         256,
 		Replicas:      0,
 		Type:          gocb.Couchbase,
@@ -223,7 +228,12 @@ func deleteAllBuckets(host string, t *testing.T) {
 		t.Fatal("Unable to connect to cluster: " + err.Error())
 	}
 
-	manager := connection.Manager("Administrator", "password")
+	connection.Authenticate(gocb.RbacAuthenticator{
+		Username: rbacUsername,
+		Password: rbacPassword,
+	})
+
+	manager := connection.Manager(rbacUsername, rbacPassword)
 	buckets, err := manager.GetBuckets()
 	if err != nil {
 		t.Fatal("Unable to get all buckets: " + err.Error())
