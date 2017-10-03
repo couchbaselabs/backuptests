@@ -22,12 +22,12 @@ func TestBackupRestore(t *testing.T) {
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false, []int{})
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
-	checkError(a.CreateBackup(backupName, config), t)
+	checkError(a.CreateRepo(backupName, config), t)
 
 	// Test that restoring data when none exists gives an error
 	err = executeRestore(a, backupName, testHost, rbacUsername, rbacPassword, "name",
@@ -43,7 +43,7 @@ func TestBackupRestore(t *testing.T) {
 		4, false, false)
 	checkError(err, t)
 
-	info, err := a.IncrBackupInfo(backupName, name)
+	info, err := a.BackupInfo(backupName, name)
 	checkError(err, t)
 
 	count := info["default"].NumDocs

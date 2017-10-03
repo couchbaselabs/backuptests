@@ -22,12 +22,12 @@ func TestBackupBadPassword(t *testing.T) {
 	backupName := "badpassword-test"
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false, []int{})
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
-	checkError(a.CreateBackup(backupName, config), t)
+	checkError(a.CreateRepo(backupName, config), t)
 
 	// Test bad password
 	_, err = executeBackup(a, backupName, "archive", testHost, rbacUsername, "badpassword",
@@ -71,18 +71,18 @@ func TestFullBackup(t *testing.T) {
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false, []int{})
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
-	checkError(a.CreateBackup("full-backup-test", config), t)
+	checkError(a.CreateRepo("full-backup-test", config), t)
 
 	name, err := executeBackup(a, "full-backup-test", "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 	checkError(err, t)
 
-	info, err := a.IncrBackupInfo("full-backup-test", name)
+	info, err := a.BackupInfo("full-backup-test", name)
 	checkError(err, t)
 
 	count := info["default"].NumDocs
@@ -107,12 +107,12 @@ func TestIncrementalBackup(t *testing.T) {
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false, []int{})
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
-	checkError(a.CreateBackup(setName, config), t)
+	checkError(a.CreateRepo(setName, config), t)
 
 	// Do full backup
 	loadData(testHost, rbacUsername, rbacPassword, "default", 5000, "full", false, t)
@@ -120,7 +120,7 @@ func TestIncrementalBackup(t *testing.T) {
 	name1, err := executeBackup(a, setName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 
-	info, err := a.IncrBackupInfo(setName, name1)
+	info, err := a.BackupInfo(setName, name1)
 	checkError(err, t)
 
 	count := info["default"].NumDocs
@@ -134,7 +134,7 @@ func TestIncrementalBackup(t *testing.T) {
 	name2, err := executeBackup(a, setName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 
-	info, err = a.IncrBackupInfo(setName, name2)
+	info, err = a.BackupInfo(setName, name2)
 	checkError(err, t)
 
 	count = info["default"].NumDocs
@@ -148,7 +148,7 @@ func TestIncrementalBackup(t *testing.T) {
 	name3, err := executeBackup(a, setName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 
-	info, err = a.IncrBackupInfo(setName, name3)
+	info, err = a.BackupInfo(setName, name3)
 	checkError(err, t)
 
 	count = info["default"].NumDocs
@@ -162,7 +162,7 @@ func TestIncrementalBackup(t *testing.T) {
 	name4, err := executeBackup(a, setName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 
-	info, err = a.IncrBackupInfo(setName, name4)
+	info, err = a.BackupInfo(setName, name4)
 	checkError(err, t)
 
 	count = info["default"].NumDocs
@@ -244,18 +244,18 @@ func TestBackupNoBucketsExist(t *testing.T) {
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false, []int{})
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
-	checkError(a.CreateBackup("full-backup-test", config), t)
+	checkError(a.CreateRepo("full-backup-test", config), t)
 
 	name, err := executeBackup(a, "full-backup-test", "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 	checkError(err, t)
 
-	info, err := a.IncrBackupInfo("full-backup-test", name)
+	info, err := a.BackupInfo("full-backup-test", name)
 	checkError(err, t)
 
 	if len(info) != 0 {
@@ -276,18 +276,18 @@ func TestBackupDeleteBucketBackupAgain(t *testing.T) {
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false, []int{})
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
-	checkError(a.CreateBackup(backupName, config), t)
+	checkError(a.CreateRepo(backupName, config), t)
 
 	name, err := executeBackup(a, backupName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 	checkError(err, t)
 
-	info, err := a.IncrBackupInfo(backupName, name)
+	info, err := a.BackupInfo(backupName, name)
 	checkError(err, t)
 
 	count := info["default"].NumDocs
@@ -303,7 +303,7 @@ func TestBackupDeleteBucketBackupAgain(t *testing.T) {
 		4, false, false)
 	checkError(err, t)
 
-	info, err = a.IncrBackupInfo(backupName, name)
+	info, err = a.BackupInfo(backupName, name)
 	checkError(err, t)
 
 	count = info["default"].NumDocs
@@ -326,18 +326,18 @@ func TestBackupWithMemcachedBucket(t *testing.T) {
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false, []int{})
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
-	checkError(a.CreateBackup(backupName, config), t)
+	checkError(a.CreateRepo(backupName, config), t)
 
 	name, err := executeBackup(a, backupName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 	checkError(err, t)
 
-	info, err := a.IncrBackupInfo(backupName, name)
+	info, err := a.BackupInfo(backupName, name)
 	checkError(err, t)
 
 	if len(info) != 1 {
@@ -363,18 +363,18 @@ func TestBackupWithIncludeBuckets(t *testing.T) {
 	include_buckets := []string{"default"}
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		include_buckets, make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false, []int{})
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
-	checkError(a.CreateBackup("full-backup-test", config), t)
+	checkError(a.CreateRepo("full-backup-test", config), t)
 
 	name, err := executeBackup(a, "full-backup-test", "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 	checkError(err, t)
 
-	info, err := a.IncrBackupInfo("full-backup-test", name)
+	info, err := a.BackupInfo("full-backup-test", name)
 	checkError(err, t)
 
 	count := info["default"].NumDocs
@@ -397,18 +397,18 @@ func TestBackupWithExcludeBuckets(t *testing.T) {
 	exclude_buckets := []string{"default"}
 	config := value.CreateBackupConfig("", "", exclude_buckets,
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false, []int{})
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
-	checkError(a.CreateBackup("full-backup-test", config), t)
+	checkError(a.CreateRepo("full-backup-test", config), t)
 
 	name, err := executeBackup(a, "full-backup-test", "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 	checkError(err, t)
 
-	info, err := a.IncrBackupInfo("full-backup-test", name)
+	info, err := a.BackupInfo("full-backup-test", name)
 	checkError(err, t)
 
 	count := info["saslbucket"].NumDocs

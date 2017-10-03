@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/couchbase/backup/archive"
+	"github.com/couchbase/backup/storage"
 	"github.com/couchbase/backup/value"
 )
 
@@ -21,12 +22,12 @@ func TestMerge(t *testing.T) {
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false, []int{})
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
-	checkError(a.CreateBackup(setName, config), t)
+	checkError(a.CreateRepo(setName, config), t)
 
 	// Do full backup
 	loadData(testHost, rbacUsername, rbacPassword, "default", 5000, "full", false, t)
@@ -34,7 +35,7 @@ func TestMerge(t *testing.T) {
 	name1, err := executeBackup(a, setName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 
-	info, err := a.IncrBackupInfo(setName, name1)
+	info, err := a.BackupInfo(setName, name1)
 	checkError(err, t)
 
 	count := info["default"].NumDocs
@@ -48,7 +49,7 @@ func TestMerge(t *testing.T) {
 	name2, err := executeBackup(a, setName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 
-	info, err = a.IncrBackupInfo(setName, name2)
+	info, err = a.BackupInfo(setName, name2)
 	checkError(err, t)
 
 	count = info["default"].NumDocs
@@ -62,7 +63,7 @@ func TestMerge(t *testing.T) {
 	name3, err := executeBackup(a, setName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 
-	info, err = a.IncrBackupInfo(setName, name3)
+	info, err = a.BackupInfo(setName, name3)
 	checkError(err, t)
 
 	count = info["default"].NumDocs
@@ -76,7 +77,7 @@ func TestMerge(t *testing.T) {
 	name4, err := executeBackup(a, setName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 
-	info, err = a.IncrBackupInfo(setName, name4)
+	info, err = a.BackupInfo(setName, name4)
 	checkError(err, t)
 
 	count = info["default"].NumDocs
@@ -85,10 +86,10 @@ func TestMerge(t *testing.T) {
 	}
 
 	// Merge the backups and make sure all the items show up in the merged backup
-	_, err = a.MergeIncrBackups(setName, name1, name4)
+	_, err = a.MergeIncrBackups(setName, name1, name4, storage.DefaultStorageConfig())
 	checkError(err, t)
 
-	info, err = a.IncrBackupInfo(setName, name4)
+	info, err = a.BackupInfo(setName, name4)
 	checkError(err, t)
 
 	count = info["default"].NumDocs
@@ -96,8 +97,8 @@ func TestMerge(t *testing.T) {
 		t.Fatalf("Expected to backup 14000 items, got %d", count)
 	}
 
-	binfo, err := a.BackupInfo(setName)
-	if binfo.NumIncrBackups != 1 {
+	binfo, err := a.RepoInfo(setName)
+	if binfo.NumBackups != 1 {
 		t.Fatalf("Expected 1 incr backups after merge, got %d", count)
 	}
 }
@@ -113,12 +114,12 @@ func TestMergeAfterPurge(t *testing.T) {
 
 	config := value.CreateBackupConfig("", "", make([]string, 0),
 		make([]string, 0), make([]string, 0), make([]string, 0),
-		false, false, false, false, false, false, false, false)
+		false, false, false, false, false, false, false, false, []int{})
 
 	a, err := archive.MountArchive(testDir, true)
 	checkError(err, t)
 
-	checkError(a.CreateBackup(setName, config), t)
+	checkError(a.CreateRepo(setName, config), t)
 
 	// Do full backup
 	loadData(testHost, rbacUsername, rbacPassword, "default", 10000, "full", false, t)
@@ -126,7 +127,7 @@ func TestMergeAfterPurge(t *testing.T) {
 	name1, err := executeBackup(a, setName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 
-	info, err := a.IncrBackupInfo(setName, name1)
+	info, err := a.BackupInfo(setName, name1)
 	checkError(err, t)
 
 	count := info["default"].NumDocs
@@ -157,7 +158,7 @@ func TestMergeAfterPurge(t *testing.T) {
 	name2, err := executeBackup(a, setName, "archive", testHost, rbacUsername, rbacPassword,
 		4, false, false)
 
-	info, err = a.IncrBackupInfo(setName, name2)
+	info, err = a.BackupInfo(setName, name2)
 	checkError(err, t)
 
 	count = info["default"].NumDocs
@@ -166,10 +167,10 @@ func TestMergeAfterPurge(t *testing.T) {
 	}
 
 	// Merge the backups and make sure all the items show up in the merged backup
-	_, err = a.MergeIncrBackups(setName, name1, name2)
+	_, err = a.MergeIncrBackups(setName, name1, name2, storage.DefaultStorageConfig())
 	checkError(err, t)
 
-	info, err = a.IncrBackupInfo(setName, name2)
+	info, err = a.BackupInfo(setName, name2)
 	checkError(err, t)
 
 	count = info["default"].NumDocs
@@ -177,8 +178,8 @@ func TestMergeAfterPurge(t *testing.T) {
 		t.Fatalf("Expected to backup 30000 items, got %d", count)
 	}
 
-	binfo, err := a.BackupInfo(setName)
-	if binfo.NumIncrBackups != 1 {
+	binfo, err := a.RepoInfo(setName)
+	if binfo.NumBackups != 1 {
 		t.Fatalf("Expected 1 incr backups after merge, got %d", count)
 	}
 }

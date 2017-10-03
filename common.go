@@ -15,6 +15,7 @@ import (
 	"github.com/couchbase/backup/archive"
 	"github.com/couchbase/backup/couchbase"
 	"github.com/couchbase/backup/plan"
+	"github.com/couchbase/backup/storage"
 	"github.com/couchbase/backup/value"
 	"github.com/couchbase/gocb"
 )
@@ -42,7 +43,8 @@ func checkError(err error, t *testing.T) {
 func executeBackup(a *archive.Archive, name, sink, host, user, pwd string, threads int,
 	resume, purge bool) (string, error) {
 	t, err := backup.CouchbaseToArchiveTransferable(a, name, host, user, pwd, "",
-		(string)(plan.COMPRESSION_POLICY_UNCHANGED), threads, resume, purge, nil)
+		(string)(plan.COMPRESSION_POLICY_UNCHANGED), threads, resume, purge, nil,
+		storage.DefaultStorageConfig())
 	if err != nil {
 		return "", err
 	}
